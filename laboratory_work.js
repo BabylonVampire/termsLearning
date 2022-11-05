@@ -1,26 +1,80 @@
-let l = console.log;
-
 let ID = 0;
 
 let termList = [];
 
+class Term {
+    constructor(termName, termSubject, id) {
+        this.termName = termName;
+        this.termSubject = termSubject;
+        this.id = id;
+    }
+    
+    addTerm() {
+        let newForm = document.createElement('form');
+
+        let fieldSet = document.createElement('div');
+        fieldSet.className = 'fieldset'
+
+        let labelBox = document.createElement('div');
+        labelBox.className = 'labelBox';
+
+        let termSubjectlabel = document.createElement('label');
+        termSubjectlabel.innerHTML = this.termSubject;
+        labelBox.appendChild(termSubjectlabel);
+
+        let termNamelabel = document.createElement('label');
+        termNamelabel.innerHTML = this.termName;
+        labelBox.appendChild(termNamelabel);
+
+        let deleteButton = document.createElement('button');
+        deleteButton.id = this.id;
+        deleteButton.type = 'button';
+        deleteButton.onclick = this.removeTerm;
+        deleteButton.innerHTML = 'remove term';
+
+        fieldSet.appendChild(labelBox);
+        fieldSet.appendChild(deleteButton);
+
+        newForm.appendChild(fieldSet);
+
+        document.body.appendChild(newForm);
+    }
+
+    removeTerm() {
+        for (let i = 0; i < termList.length; ++i) {
+            if (termList[i].id == this.id) {
+                termList.splice(i, 1);
+            }
+        }
+        printAllTerms();
+    }
+}
+
+//создание нового термина
 function createTermObject() {
     let termName = document.getElementById('name');
     let termSubject = document.getElementById('subject');
+
+    //проверка на пустые поля ввода
     if (!termName.value && !termSubject.value) return;
+
     let newTerm = new Term(termName.value, termSubject.value, ID);
     let isInArr = false;
+    
+    //проверка на повторы
     for (let i = 0; i < termList.length; ++i) {
         if (termList[i].termName == newTerm.termName && termList[i].termSubject == newTerm.termSubject) isInArr = !isInArr;
     }
+
     if (!isInArr) {
         termList.push(newTerm);
         ++ID;
     }
-    l(termList);
+
     printAllTerms();
 }
 
+//обновление всех терминов на странице
 function printAllTerms() {
     document.querySelectorAll('form').forEach(e => e.remove());
     for (let i = 0; i < termList.length; ++i) {
@@ -85,51 +139,3 @@ fieldSet.appendChild(saveButton);
 
 newForm.appendChild(fieldSet);
 document.body.appendChild(newForm);
-
-class Term {
-    constructor(termName, termSubject, id) {
-        this.termName = termName;
-        this.termSubject = termSubject;
-        this.id = id;
-    }
-    
-    addTerm() {
-        let newForm = document.createElement('form');
-
-        let fieldSet = document.createElement('div');
-        fieldSet.className = 'fieldset'
-
-        let labelBox = document.createElement('div');
-        labelBox.className = 'labelBox';
-
-        let termSubjectlabel = document.createElement('label');
-        termSubjectlabel.innerHTML = this.termSubject;
-        labelBox.appendChild(termSubjectlabel);
-
-        let termNamelabel = document.createElement('label');
-        termNamelabel.innerHTML = this.termName;
-        labelBox.appendChild(termNamelabel);
-
-        let deleteButton = document.createElement('button');
-        deleteButton.id = this.id;
-        deleteButton.type = 'button';
-        deleteButton.onclick = this.removeTerm;
-        deleteButton.innerHTML = 'remove term';
-
-        fieldSet.appendChild(labelBox);
-        fieldSet.appendChild(deleteButton);
-
-        newForm.appendChild(fieldSet);
-
-        document.body.appendChild(newForm);
-    }
-
-    removeTerm() {
-        for (let i = 0; i < termList.length; ++i) {
-            if (termList[i].id == this.id) {
-                termList.splice(i, 1);
-            }
-        }
-        printAllTerms();
-    }
-}
