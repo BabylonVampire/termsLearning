@@ -1,86 +1,6 @@
+let l = console.log;
+
 let ID = 0;
-
-let termList = [];
-
-class Term {
-    constructor(termName, termSubject, id) {
-        this.termName = termName;
-        this.termSubject = termSubject;
-        this.id = id;
-    }
-    
-    addTerm() {
-        let newForm = document.createElement('form');
-
-        let fieldSet = document.createElement('div');
-        fieldSet.className = 'fieldset'
-
-        let labelBox = document.createElement('div');
-        labelBox.className = 'labelBox';
-
-        let termSubjectlabel = document.createElement('label');
-        termSubjectlabel.innerHTML = this.termSubject;
-        labelBox.appendChild(termSubjectlabel);
-
-        let termNamelabel = document.createElement('label');
-        termNamelabel.innerHTML = this.termName;
-        labelBox.appendChild(termNamelabel);
-
-        let deleteButton = document.createElement('button');
-        deleteButton.id = this.id;
-        deleteButton.type = 'button';
-        deleteButton.onclick = this.removeTerm;
-        deleteButton.innerHTML = 'remove term';
-
-        fieldSet.appendChild(labelBox);
-        fieldSet.appendChild(deleteButton);
-
-        newForm.appendChild(fieldSet);
-
-        document.body.appendChild(newForm);
-    }
-
-    removeTerm() {
-        for (let i = 0; i < termList.length; ++i) {
-            if (termList[i].id == this.id) {
-                termList.splice(i, 1);
-            }
-        }
-        printAllTerms();
-    }
-}
-
-//создание нового термина
-function createTermObject() {
-    let termName = document.getElementById('name');
-    let termSubject = document.getElementById('subject');
-
-    //проверка на пустые поля ввода
-    if (!termName.value && !termSubject.value) return;
-
-    let newTerm = new Term(termName.value, termSubject.value, ID);
-    let isInArr = false;
-    
-    //проверка на повторы
-    for (let i = 0; i < termList.length; ++i) {
-        if (termList[i].termName == newTerm.termName && termList[i].termSubject == newTerm.termSubject) isInArr = !isInArr;
-    }
-
-    if (!isInArr) {
-        termList.push(newTerm);
-        ++ID;
-    }
-
-    printAllTerms();
-}
-
-//обновление всех терминов на странице
-function printAllTerms() {
-    document.querySelectorAll('form').forEach(e => e.remove());
-    for (let i = 0; i < termList.length; ++i) {
-        termList[i].addTerm();
-    }
-}
 
 //создание новой формы
 let newForm = document.createElement('div');
@@ -137,5 +57,134 @@ saveButton.onclick = createTermObject;
 saveButton.innerHTML = 'save';
 fieldSet.appendChild(saveButton);
 
+//кнопка удаления снять изученное
+let clearButton = document.createElement('button');
+clearButton.type = 'button';
+clearButton.onclick = function() {
+    deletedTerms = [];
+    localStorage.setItem('deletedTerms', JSON.stringify(deletedTerms));
+};
+clearButton.innerHTML = 'clear learned terms';
+fieldSet.appendChild(clearButton);
+
 newForm.appendChild(fieldSet);
 document.body.appendChild(newForm);
+
+class Term {
+    constructor(termName, termSubject, id) {
+        this.termName = termName;
+        this.termSubject = termSubject;
+        this.id = id;
+    }
+    
+    addTerm() {
+        let newForm = document.createElement('form');
+
+        let fieldSet = document.createElement('div');
+        fieldSet.className = 'fieldset'
+
+        let labelBox = document.createElement('div');
+        labelBox.className = 'labelBox';
+
+        let termSubjectlabel = document.createElement('label');
+        termSubjectlabel.innerHTML = this.termSubject;
+        labelBox.appendChild(termSubjectlabel);
+
+        let termNamelabel = document.createElement('label');
+        termNamelabel.innerHTML = this.termName;
+        labelBox.appendChild(termNamelabel);
+
+        let deleteButton = document.createElement('button');
+        deleteButton.id = this.id;
+        deleteButton.type = 'button';
+        deleteButton.onclick = this.removeTerm;
+        deleteButton.innerHTML = 'studied';
+
+        fieldSet.appendChild(labelBox);
+        fieldSet.appendChild(deleteButton);
+
+        newForm.appendChild(fieldSet);
+
+        document.body.appendChild(newForm);
+    }
+
+    removeTerm() {
+        for (let i = 0; i < termList.length; ++i) {
+            if (termList[i].id == this.id) {
+                deletedTerms.push(termList[i]);
+                termList.splice(i, 1);
+            }
+        }
+        printAllTerms();
+    }
+}
+
+//localStorage.clear();
+
+let termList = [];
+let deletedTerms = [];
+
+l(localStorage);
+
+//ПОЙМАТЬ ОШИБКУ Uncaught SyntaxError: Unexpected end of JSON input
+
+if (!JSON.parse(localStorage.getItem('termList')) && !JSON.parse(localStorage.getItem('deletedTerms'))) {
+    localStorage.setItem('termList', JSON.stringify(termList));
+    localStorage.setItem('deletedTerms', JSON.stringify(deletedTerms));
+}
+
+else {
+    parsedTermList = JSON.parse(localStorage.getItem('termList'));
+    parsedDeletedTerms = JSON.parse(localStorage.getItem('deletedTerms'));
+
+    for (let i = 0; i < parsedTermList.length; ++i) {
+        termList.push(new Term(parsedTermList[i].termName, parsedTermList[i].termSubject, ID));
+        ++ID;
+    }
+
+    for (let i = 0; i < parsedDeletedTerms.length; ++i) {
+        deletedTerms.push(new Term(parsedDeletedTerms[i].termName, parsedDeletedTerms[i].termSubject, ID));
+        ++ID;
+    }
+
+    printAllTerms();
+}
+
+l(termList);
+l(deletedTerms);
+
+//создание нового термина
+function createTermObject() {
+    let termName = document.getElementById('name').value;
+    let termSubject = document.getElementById('subject').value;
+
+    //проверка на пустые поля ввода
+    if (!termName && !termSubject) return;
+
+    //проверка на повторы среди неизученных терминов
+    for (let i = 0; i < termList.length; ++i) {
+        if (termList[i].termName == termName && termList[i].termSubject == termSubject) return;
+    }
+
+    //проверка на повторы среди изученных терминов
+    for (let i = 0; i < deletedTerms.length; ++i) {
+        if (deletedTerms[i].termName == termName && deletedTerms[i].termSubject == termSubject) return;
+    }
+
+    let newTerm = new Term(termName, termSubject, ID);
+
+    termList.push(newTerm);
+    ++ID;
+
+    printAllTerms();
+}
+
+//обновление всех терминов на странице
+function printAllTerms() {
+    document.querySelectorAll('form').forEach(e => e.remove());
+    for (let i = 0; i < termList.length; ++i) {
+        termList[i].addTerm();
+    }
+    localStorage.setItem('termList', JSON.stringify(termList));
+    localStorage.setItem('deletedTerms', JSON.stringify(deletedTerms));
+}
