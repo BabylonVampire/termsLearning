@@ -21,7 +21,7 @@ let p1 = document.createElement('p');
 //label для ввода названия
 let namelabel = document.createElement('label');
 namelabel.for = 'text';
-namelabel.innerHTML = 'Subject of study:<br>';
+namelabel.innerHTML = 'Subject of study:';
 p1.appendChild(namelabel);
 
 //input для ввода названия
@@ -39,7 +39,7 @@ let p2 = document.createElement('p');
 //label для ввода текста
 let textlabel = document.createElement('label');
 namelabel.for = 'text';
-textlabel.innerHTML = 'Glossary of terms:<br>';
+textlabel.innerHTML = 'Glossary of terms:';
 p2.appendChild(textlabel);
 
 //input для ввода текста
@@ -60,11 +60,11 @@ fieldSet.appendChild(saveButton);
 //кнопка удаления снять изученное
 let clearButton = document.createElement('button');
 clearButton.type = 'button';
+clearButton.innerHTML = 'clear learned terms';
 clearButton.onclick = function() {
     deletedTerms = [];
     localStorage.setItem('deletedTerms', JSON.stringify(deletedTerms));
 };
-clearButton.innerHTML = 'clear learned terms';
 fieldSet.appendChild(clearButton);
 
 newForm.appendChild(fieldSet);
@@ -119,20 +119,18 @@ class Term {
     }
 }
 
-//localStorage.clear();
-
 let termList = [];
 let deletedTerms = [];
 
-l(localStorage);
+//Смотрим, есть ли записи в localStorage
 
-//ПОЙМАТЬ ОШИБКУ Uncaught SyntaxError: Unexpected end of JSON input
-
+//Если их нет, создаем два объекта для хранения изучаемых и изученных терминов
 if (!JSON.parse(localStorage.getItem('termList')) && !JSON.parse(localStorage.getItem('deletedTerms'))) {
     localStorage.setItem('termList', JSON.stringify(termList));
     localStorage.setItem('deletedTerms', JSON.stringify(deletedTerms));
 }
 
+//Если есть, то получаем данные объектов
 else {
     parsedTermList = JSON.parse(localStorage.getItem('termList'));
     parsedDeletedTerms = JSON.parse(localStorage.getItem('deletedTerms'));
@@ -149,9 +147,6 @@ else {
 
     printAllTerms();
 }
-
-l(termList);
-l(deletedTerms);
 
 //создание нового термина
 function createTermObject() {
